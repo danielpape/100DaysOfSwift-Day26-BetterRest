@@ -20,44 +20,56 @@ struct ContentView: View {
     var body: some View {
         NavigationView{
             Form{
-                VStack(alignment: .leading){
-                    /*@START_MENU_TOKEN@*/Text("Placeholder")/*@END_MENU_TOKEN@*/
-                    
-                    Text("When would you like to wake up?")
-                        .font(.headline)
-                    DatePicker("Pick a date",
-                               selection: $wakeUp,
-                               displayedComponents: .hourAndMinute)
-                        .datePickerStyle(WheelDatePickerStyle())
-                }
-                VStack(alignment: .leading){
-                    
-                    Text("Desired amount of sleep")
-                        .font(.headline)
-                    
-                    Stepper(value: $sleepAmount, in: 4...12, step: 0.25){
-                        Text("\(sleepAmount,specifier: "%g") hours")
+                Section{
+                    VStack(alignment: .leading){
+                        Text("When would you like to wake up?")
+                            .font(.headline)
+                        DatePicker("Pick a date",
+                                   selection: $wakeUp,
+                                   displayedComponents: .hourAndMinute)
+                            .datePickerStyle(WheelDatePickerStyle())
+                            .onChange(of: wakeUp) { newValue in
+                                            calculateBedTime()
+                                        }
+                    }
+                    VStack(alignment: .leading){
+                        
+                        Text("Desired amount of sleep")
+                            .font(.headline)
+                        
+                        Stepper(value: $sleepAmount, in: 4...12, step: 0.25){
+                            Text("\(sleepAmount,specifier: "%g") hours")
+                        }
+                        .onChange(of: sleepAmount) { newValue in
+                                        calculateBedTime()
+                                    }
+                    }
+                    VStack(alignment: .leading){
+                        
+                        Text("Amount of Coffee")
+                            .font(.headline)
+                        
+                        Stepper(value: $coffeeAmount, in: 1...20, step: 1){
+                            Text("\(coffeeAmount) cup\(coffeeAmount == 1 ? "" : "s")")
+                        }
+                        .onChange(of: coffeeAmount) { newValue in
+                                        calculateBedTime()
+                                    }
                     }
                 }
-                VStack(alignment: .leading){
-                    
-                    Text("Amount of Coffee")
+                Section{
+                    if(alertTitle != ""){
+                        Text(alertTitle)
                         .font(.headline)
+                    Text(alertMessage)
                     
-                    Stepper(value: $coffeeAmount, in: 1...20, step: 1){
-                        Text("\(coffeeAmount) cup\(coffeeAmount == 1 ? "" : "s")")
                     }
+                }
+                .onAppear(){
+                    calculateBedTime()
                 }
             }
             .navigationTitle("Better Rest")
-            .navigationBarItems(trailing:
-                                    Button(action:calculateBedTime){
-                                        Text("Calculate")
-                                    }
-            )
-            .alert(isPresented: $showingAlert){
-                Alert(title: Text(alertTitle), message: Text(alertMessage), dismissButton: .default(Text("OK")))
-            }
         }
     }
     
@@ -89,7 +101,7 @@ struct ContentView: View {
             alertTitle = "error"
             alertMessage = "Sorry, there wasa problem calculating your bedtime."
         }
-        showingAlert = true
+//        showingAlert = true
     }
 }
 
